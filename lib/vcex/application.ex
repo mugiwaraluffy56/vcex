@@ -1,26 +1,26 @@
-defmodule LanCall.Application do
+defmodule Vcex.Application do
   use Application
 
   @impl true
   def start(_type, _args) do
-    start_server? = Application.get_env(:lan_call, :start_server, true)
+    start_server? = Application.get_env(:vcex, :start_server, true)
 
     children =
       if start_server? do
-        [LanCall.Room, LanCall.Server]
+        [Vcex.Room, Vcex.Server]
       else
         []
       end
 
-    case Supervisor.start_link(children, strategy: :one_for_one, name: LanCall.Supervisor) do
+    case Supervisor.start_link(children, strategy: :one_for_one, name: Vcex.Supervisor) do
       {:ok, _pid} = result ->
         if start_server? do
-          LanCall.Banner.print(configured_port())
+          Vcex.Banner.print(configured_port())
         end
 
         result
 
-      {:error, {:shutdown, {:failed_to_start_child, LanCall.Server, {:port_in_use, port}}}} ->
+      {:error, {:shutdown, {:failed_to_start_child, Vcex.Server, {:port_in_use, port}}}} ->
         IO.puts("""
         Port #{port} already in use.
 
@@ -40,7 +40,7 @@ defmodule LanCall.Application do
 
   defp configured_port do
     case System.get_env("PORT") do
-      nil -> Application.get_env(:lan_call, :port, 4000)
+      nil -> Application.get_env(:vcex, :port, 4000)
       value -> String.to_integer(value)
     end
   end

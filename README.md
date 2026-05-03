@@ -1,4 +1,4 @@
-# LAN Call
+# vcex
 
 Offline LAN video call prototype in Elixir. Elixir serves page and WebSocket signaling. Browser handles camera, mic, video codec, jitter, and WebRTC peer connection.
 

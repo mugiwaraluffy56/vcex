@@ -1,4 +1,4 @@
-defmodule LanCall.HTTPTest do
+defmodule Vcex.HTTPTest do
   use ExUnit.Case, async: true
 
   test "parses request line and headers" do
@@ -8,11 +8,11 @@ defmodule LanCall.HTTPTest do
              method: "GET",
              path: "/ws",
              headers: %{"host" => "localhost", "upgrade" => "websocket"}
-           } = LanCall.HTTP.parse(request)
+           } = Vcex.HTTP.parse(request)
   end
 
   test "builds response" do
-    response = LanCall.HTTP.response(200, "text/plain", "ok")
+    response = Vcex.HTTP.response(200, "text/plain", "ok")
     assert response =~ "HTTP/1.1 200 OK"
     assert response =~ "content-length: 2"
   end

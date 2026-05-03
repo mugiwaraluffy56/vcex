@@ -1,4 +1,4 @@
-defmodule LanCall.Server do
+defmodule Vcex.Server do
   use GenServer
   require Logger
 
@@ -6,7 +6,7 @@ defmodule LanCall.Server do
 
   @impl true
   def init(opts) do
-    host = Keyword.get(opts, :host, Application.get_env(:lan_call, :host, {0, 0, 0, 0}))
+    host = Keyword.get(opts, :host, Application.get_env(:vcex, :host, {0, 0, 0, 0}))
     port = Keyword.get(opts, :port, configured_port())
 
     case :gen_tcp.listen(port, [:binary, active: false, reuseaddr: true, ip: host]) do
@@ -24,7 +24,7 @@ defmodule LanCall.Server do
 
   defp configured_port do
     case System.get_env("PORT") do
-      nil -> Application.get_env(:lan_call, :port, 4000)
+      nil -> Application.get_env(:vcex, :port, 4000)
       value -> String.to_integer(value)
     end
   end
@@ -39,7 +39,7 @@ defmodule LanCall.Server do
 
   defp handle_client(socket) do
     case :gen_tcp.recv(socket, 0, 5_000) do
-      {:ok, request} -> route(socket, LanCall.HTTP.parse(request))
+      {:ok, request} -> route(socket, Vcex.HTTP.parse(request))
       {:error, _reason} -> :gen_tcp.close(socket)
     end
   rescue
@@ -50,8 +50,8 @@ defmodule LanCall.Server do
 
   defp route(socket, %{path: "/ws", headers: headers}) do
     if String.downcase(Map.get(headers, "upgrade", "")) == "websocket" do
-      :ok = :gen_tcp.send(socket, LanCall.WebSocket.handshake(headers))
-      :ok = LanCall.Room.join(self())
+      :ok = :gen_tcp.send(socket, Vcex.WebSocket.handshake(headers))
+      :ok = Vcex.Room.join(self())
       ws_loop(socket)
     else
       send_response(socket, 426, "text/plain", "websocket required")
@@ -63,18 +63,18 @@ defmodule LanCall.Server do
   defp route(socket, %{path: path}), do: serve_file(socket, String.trim_leading(path, "/"))
 
   defp serve_file(socket, path) do
-    public_dir = Application.get_env(:lan_call, :public_dir, "public")
+    public_dir = Application.get_env(:vcex, :public_dir, "public")
     safe_path = path |> String.split("/") |> Enum.reject(&(&1 in ["", ".", ".."])) |> Path.join()
     file = Path.join(public_dir, safe_path)
 
     case File.read(file) do
-      {:ok, body} -> send_response(socket, 200, LanCall.HTTP.mime(file), body)
+      {:ok, body} -> send_response(socket, 200, Vcex.HTTP.mime(file), body)
       {:error, _reason} -> send_response(socket, 404, "text/plain", "not found")
     end
   end
 
   defp send_response(socket, status, content_type, body) do
-    :gen_tcp.send(socket, LanCall.HTTP.response(status, content_type, body))
+    :gen_tcp.send(socket, Vcex.HTTP.response(status, content_type, body))
     :gen_tcp.close(socket)
   end
 
@@ -83,35 +83,35 @@ defmodule LanCall.Server do
 
     receive do
       {:tcp, ^socket, frame} ->
-        case LanCall.WebSocket.decode(frame) do
-          {:ok, 1, payload} -> LanCall.Room.relay(self(), payload)
-          {:ok, 8, _payload} -> LanCall.Room.leave(self())
+        case Vcex.WebSocket.decode(frame) do
+          {:ok, 1, payload} -> Vcex.Room.relay(self(), payload)
+          {:ok, 8, _payload} -> Vcex.Room.leave(self())
           _other -> :ok
         end
 
         ws_loop(socket)
 
       {:ws_send, payload} ->
-        :gen_tcp.send(socket, LanCall.WebSocket.encode_text(payload))
+        :gen_tcp.send(socket, Vcex.WebSocket.encode_text(payload))
         ws_loop(socket)
 
       {:peer_count, count} ->
         :gen_tcp.send(
           socket,
-          LanCall.WebSocket.encode_text(~s({"type":"peer-count","count":#{count}}))
+          Vcex.WebSocket.encode_text(~s({"type":"peer-count","count":#{count}}))
         )
 
         ws_loop(socket)
 
       {:tcp_closed, ^socket} ->
-        LanCall.Room.leave(self())
+        Vcex.Room.leave(self())
 
       {:tcp_error, ^socket, _reason} ->
-        LanCall.Room.leave(self())
+        Vcex.Room.leave(self())
     after
       120_000 ->
         :gen_tcp.close(socket)
-        LanCall.Room.leave(self())
+        Vcex.Room.leave(self())
     end
   end
 end

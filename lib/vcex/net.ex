@@ -1,4 +1,4 @@
-defmodule LanCall.Net do
+defmodule Vcex.Net do
   def local_ip do
     {:ok, ifs} = :inet.getifaddrs()
 

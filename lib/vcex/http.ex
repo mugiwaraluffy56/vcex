@@ -1,4 +1,4 @@
-defmodule LanCall.HTTP do
+defmodule Vcex.HTTP do
   @status %{
     200 => "OK",
     400 => "Bad Request",

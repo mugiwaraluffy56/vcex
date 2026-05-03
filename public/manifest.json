@@ -1,6 +1,6 @@
 {
-  "name": "LAN Call",
-  "short_name": "LAN Call",
+  "name": "vcex",
+  "short_name": "vcex",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#101316",

@@ -1,13 +1,13 @@
-defmodule LanCall.WebSocketTest do
+defmodule Vcex.WebSocketTest do
   use ExUnit.Case, async: true
 
   test "accept key matches RFC example" do
-    assert LanCall.WebSocket.accept_key("dGhlIHNhbXBsZSBub25jZQ==") ==
+    assert Vcex.WebSocket.accept_key("dGhlIHNhbXBsZSBub25jZQ==") ==
              "s3pPLMBiTxaQ9kYGzzhZRbK+xOo="
   end
 
   test "encodes small text frames" do
-    assert LanCall.WebSocket.encode_text("hi") == <<0x81, 2, "hi">>
+    assert Vcex.WebSocket.encode_text("hi") == <<0x81, 2, "hi">>
   end
 
   test "decodes masked browser text frame" do
@@ -23,6 +23,6 @@ defmodule LanCall.WebSocketTest do
 
     frame = <<1::1, 0::3, 1::4, 1::1, 2::7, mask::binary, payload::binary>>
 
-    assert {:ok, 1, "hi"} = LanCall.WebSocket.decode(frame)
+    assert {:ok, 1, "hi"} = Vcex.WebSocket.decode(frame)
   end
 end

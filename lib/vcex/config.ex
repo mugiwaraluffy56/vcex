@@ -7,7 +7,7 @@ defmodule Vcex.Config do
 
     """
     {
-      "iceTransportPolicy": "relay",
+      "iceTransportPolicy": "all",
       "iceServers": [
         {
           "urls": [

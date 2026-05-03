@@ -182,18 +182,26 @@ const createPeer = () => {
   };
 
   pc.ontrack = (event) => {
-    const [stream] = event.streams;
+  const [stream] = event.streams;
+
+  if (remoteVideo.srcObject !== stream) {
     remoteVideo.srcObject = stream;
-    remoteVideo.muted = false;
+  }
+
+  remoteVideo.muted = false;
+
+  if (event.track.kind === "video") {
     remoteVideo
       .play()
-      .then(() => log(`remote ${event.track.kind} playing`))
+      .then(() => log("remote video playing"))
       .catch((error) => {
         log(`remote play blocked: ${error.message}`);
         setStatus("Click remote video to play");
       });
-    log(`remote ${event.track.kind} track received`);
-  };
+  }
+
+  log(`remote ${event.track.kind} track received`);
+};
 
   pc.onconnectionstatechange = () => {
     setStatus(`Peer ${pc.connectionState}`);

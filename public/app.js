@@ -175,8 +175,17 @@ const createPeer = () => {
   };
 
   pc.ontrack = (event) => {
-    remoteVideo.srcObject = event.streams[0];
-    log("remote track received");
+    const [stream] = event.streams;
+    remoteVideo.srcObject = stream;
+    remoteVideo.muted = false;
+    remoteVideo
+      .play()
+      .then(() => log(`remote ${event.track.kind} playing`))
+      .catch((error) => {
+        log(`remote play blocked: ${error.message}`);
+        setStatus("Click remote video to play");
+      });
+    log(`remote ${event.track.kind} track received`);
   };
 
   pc.onconnectionstatechange = () => {
@@ -187,6 +196,10 @@ const createPeer = () => {
 
   pc.oniceconnectionstatechange = () => {
     log(`ice ${pc.iceConnectionState}`);
+
+    if (pc.iceConnectionState === "failed" || pc.iceConnectionState === "disconnected") {
+      setStatus(`ICE ${pc.iceConnectionState}`);
+    }
   };
 
   pc.onicegatheringstatechange = () => {
@@ -283,6 +296,10 @@ hangupBtn.onclick = () => {
   hangupBtn.disabled = true;
   callBtn.disabled = !(ws && ws.readyState === WebSocket.OPEN && localStream);
   setStatus("Hung up");
+};
+
+remoteVideo.onclick = () => {
+  remoteVideo.play().catch(fail);
 };
 
 acceptBtn.onclick = () => {

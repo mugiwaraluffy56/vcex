@@ -87,6 +87,10 @@ video {
   display: block;
 }
 
+#localVideo {
+  transform: scaleX(-1);
+}
+
 span {
   position: absolute;
   left: 12px;

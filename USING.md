@@ -87,6 +87,12 @@ If the page loads but remote video stays blank, the LAN may block peer-to-peer W
 If port `4000` is busy, stop the old server or start on another port:
 
 ```bash
+PORT=4050 mix run --no-halt
+```
+
+You can also use:
+
+```bash
 elixir call_host.exs 4050
 ```
 

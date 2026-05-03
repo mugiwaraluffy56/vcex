@@ -7,10 +7,26 @@ defmodule LanCall.Server do
   @impl true
   def init(opts) do
     host = Keyword.get(opts, :host, Application.get_env(:lan_call, :host, {0, 0, 0, 0}))
-    port = Keyword.get(opts, :port, Application.get_env(:lan_call, :port, 4000))
-    {:ok, socket} = :gen_tcp.listen(port, [:binary, active: false, reuseaddr: true, ip: host])
-    send(self(), :accept)
-    {:ok, %{socket: socket, port: port}}
+    port = Keyword.get(opts, :port, configured_port())
+
+    case :gen_tcp.listen(port, [:binary, active: false, reuseaddr: true, ip: host]) do
+      {:ok, socket} ->
+        send(self(), :accept)
+        {:ok, %{socket: socket, port: port}}
+
+      {:error, :eaddrinuse} ->
+        {:stop, {:port_in_use, port}}
+
+      {:error, reason} ->
+        {:stop, {:listen_failed, port, reason}}
+    end
+  end
+
+  defp configured_port do
+    case System.get_env("PORT") do
+      nil -> Application.get_env(:lan_call, :port, 4000)
+      value -> String.to_integer(value)
+    end
   end
 
   @impl true

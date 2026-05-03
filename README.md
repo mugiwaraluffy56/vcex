@@ -14,6 +14,12 @@ Open:
 http://localhost:4000
 ```
 
+If port `4000` is busy:
+
+```bash
+PORT=4050 mix run --no-halt
+```
+
 ## SSH Access
 
 From second machine:

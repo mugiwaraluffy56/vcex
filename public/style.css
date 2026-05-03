@@ -59,6 +59,42 @@ span {
   white-space: pre-wrap;
 }
 
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.dialog {
+  width: min(360px, 100%);
+  padding: 18px;
+  border: 1px solid #3c4650;
+  border-radius: 8px;
+  background: #11171c;
+}
+
+.dialog h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.dialog p {
+  margin-bottom: 16px;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.modal[hidden] {
+  display: none;
+}
+
 .controls {
   display: flex;
   gap: 8px;

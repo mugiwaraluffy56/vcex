@@ -7,6 +7,9 @@ const peerCountEl = document.querySelector("#peerCount");
 const localVideo = document.querySelector("#localVideo");
 const remoteVideo = document.querySelector("#remoteVideo");
 const logEl = document.querySelector("#log");
+const incomingModal = document.querySelector("#incomingModal");
+const acceptBtn = document.querySelector("#acceptBtn");
+const declineBtn = document.querySelector("#declineBtn");
 
 let ws;
 let pc;
@@ -14,6 +17,7 @@ let localStream;
 let pendingCandidates = [];
 let wsReadyResolve;
 let wsReadyReject;
+let incomingOffer;
 
 const wsUrl = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
 wsUrlEl.textContent = wsUrl;
@@ -38,6 +42,18 @@ const refreshControls = () => {
   const cameraReady = Boolean(localStream);
   callBtn.disabled = !(signalReady && cameraReady);
   hangupBtn.disabled = !cameraReady;
+};
+
+const showIncoming = (offer) => {
+  incomingOffer = offer;
+  incomingModal.hidden = false;
+  setStatus("Incoming call");
+  log("incoming call");
+};
+
+const hideIncoming = () => {
+  incomingModal.hidden = true;
+  incomingOffer = null;
 };
 
 const connectSocket = () => {
@@ -80,13 +96,7 @@ const connectSocket = () => {
 
       if (msg.type === "offer") {
         log("offer received");
-        await pc.setRemoteDescription(msg);
-        await flushCandidates();
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        send(answer);
-        setStatus("Answered");
-        log("answer sent");
+        showIncoming(msg);
       }
 
       if (msg.type === "answer") {
@@ -94,6 +104,12 @@ const connectSocket = () => {
         await pc.setRemoteDescription(msg);
         await flushCandidates();
         setStatus("Connected");
+      }
+
+      if (msg.type === "decline") {
+        setStatus("Call declined");
+        log("call declined");
+        callBtn.disabled = false;
       }
 
       if (msg.type === "candidate" && msg.candidate) {
@@ -188,6 +204,32 @@ const createPeer = () => {
   return pc;
 };
 
+const acceptIncoming = async () => {
+  if (!incomingOffer) return;
+  if (!pc) createPeer();
+
+  if (pc.signalingState !== "stable") {
+    await pc.setLocalDescription({ type: "rollback" });
+    log("local offer rolled back");
+  }
+
+  await pc.setRemoteDescription(incomingOffer);
+  await flushCandidates();
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  send(answer);
+  hideIncoming();
+  setStatus("Answered");
+  log("answer sent");
+};
+
+const declineIncoming = () => {
+  send({ type: "decline" });
+  hideIncoming();
+  setStatus("Call declined");
+  log("incoming declined");
+};
+
 startBtn.onclick = async () => {
   try {
     startBtn.disabled = true;
@@ -242,3 +284,9 @@ hangupBtn.onclick = () => {
   callBtn.disabled = !(ws && ws.readyState === WebSocket.OPEN && localStream);
   setStatus("Hung up");
 };
+
+acceptBtn.onclick = () => {
+  acceptIncoming().catch(fail);
+};
+
+declineBtn.onclick = declineIncoming;

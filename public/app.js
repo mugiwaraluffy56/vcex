@@ -89,6 +89,17 @@ const flushCandidates = async () => {
   }
 };
 
+const tuneSender = async (sender) => {
+  if (!sender.track || sender.track.kind !== "video" || !sender.getParameters) return;
+
+  const params = sender.getParameters();
+  params.encodings = params.encodings && params.encodings.length > 0 ? params.encodings : [{}];
+  params.encodings[0].maxBitrate = 8_000_000;
+  params.encodings[0].maxFramerate = 60;
+  params.encodings[0].scaleResolutionDownBy = 1;
+  await sender.setParameters(params);
+};
+
 const createPeer = () => {
   pc = new RTCPeerConnection({ iceServers: [] });
 
@@ -106,7 +117,11 @@ const createPeer = () => {
   };
 
   if (localStream) {
-    localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
+    localStream.getTracks().forEach((track) => {
+      track.contentHint = track.kind === "video" ? "motion" : "speech";
+      const sender = pc.addTrack(track, localStream);
+      tuneSender(sender).catch(fail);
+    });
   }
 
   return pc;
@@ -118,7 +133,11 @@ startBtn.onclick = async () => {
     callBtn.disabled = true;
     connectSocket();
     localStream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 1280, height: 720, frameRate: 30 },
+      video: {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        frameRate: { ideal: 60, max: 60 }
+      },
       audio: true
     });
     localVideo.srcObject = localStream;

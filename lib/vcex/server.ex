@@ -67,6 +67,10 @@ defmodule Vcex.Server do
   end
 
   defp route(socket, %{path: "/health"}), do: send_response(socket, 200, "text/plain", "ok")
+
+  defp route(socket, %{path: "/config.json"}),
+    do: send_response(socket, 200, "application/json", Vcex.Config.client_json())
+
   defp route(socket, %{path: "/"}), do: serve_file(socket, "index.html")
   defp route(socket, %{path: path}), do: serve_file(socket, String.trim_leading(path, "/"))
 

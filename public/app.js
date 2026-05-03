@@ -18,6 +18,7 @@ let pendingCandidates = [];
 let wsReadyResolve;
 let wsReadyReject;
 let incomingOffer;
+let rtcConfig = { iceServers: [], iceTransportPolicy: "all" };
 
 const wsUrl = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
 wsUrlEl.textContent = wsUrl;
@@ -156,6 +157,12 @@ const flushCandidates = async () => {
   }
 };
 
+const loadRtcConfig = async () => {
+  const response = await fetch("/config.json", { cache: "no-store" });
+  rtcConfig = await response.json();
+  log(`ice policy ${rtcConfig.iceTransportPolicy}`);
+};
+
 const tuneSender = async (sender) => {
   if (!sender.track || sender.track.kind !== "video" || !sender.getParameters) return;
 
@@ -168,7 +175,7 @@ const tuneSender = async (sender) => {
 };
 
 const createPeer = () => {
-  pc = new RTCPeerConnection({ iceServers: [] });
+  pc = new RTCPeerConnection(rtcConfig);
 
   pc.onicecandidate = (event) => {
     if (event.candidate) send({ type: "candidate", candidate: event.candidate });
@@ -248,6 +255,7 @@ startBtn.onclick = async () => {
     startBtn.disabled = true;
     callBtn.disabled = true;
     connectSocket();
+    await loadRtcConfig();
     const signalReady = waitForSignal();
     localStream = await navigator.mediaDevices.getUserMedia({
       video: {

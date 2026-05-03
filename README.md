@@ -34,6 +34,8 @@ Then open `http://localhost:4000`.
 
 Both peers must share LAN. No public internet STUN/TURN used. If network has client isolation, signaling may work but media can fail.
 
+If direct media fails with `ice failed`, run local TURN relay. See `docs/turn.md`.
+
 ## Scripts
 
 - `elixir dev_server.exs`: start local server.

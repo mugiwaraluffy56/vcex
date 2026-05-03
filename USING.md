@@ -84,6 +84,14 @@ If camera access fails, use `localhost` or enable HTTPS later. Browsers allow ca
 
 If the page loads but remote video stays blank, the LAN may block peer-to-peer WebRTC traffic. Try the same Wi-Fi network without guest isolation, or test with two tabs on the same machine.
 
+If logs show `ice failed` or `peer failed`, run the local TURN relay:
+
+```bash
+elixir start_turn.exs
+```
+
+See `docs/turn.md`.
+
 If port `4000` is busy, stop the old server or start on another port:
 
 ```bash

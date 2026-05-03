@@ -23,6 +23,18 @@ defmodule Vcex.WebSocketTest do
 
     frame = <<1::1, 0::3, 1::4, 1::1, 2::7, mask::binary, payload::binary>>
 
-    assert {:ok, 1, "hi"} = Vcex.WebSocket.decode(frame)
+    assert {:ok, 1, "hi", ""} = Vcex.WebSocket.decode_frame(frame)
+  end
+
+  test "keeps tail after one frame" do
+    mask = <<1, 2, 3, 4>>
+    payload = <<Bitwise.bxor(?h, 1), Bitwise.bxor(?i, 2)>>
+    frame = <<1::1, 0::3, 1::4, 1::1, 2::7, mask::binary, payload::binary, "tail">>
+
+    assert {:ok, 1, "hi", "tail"} = Vcex.WebSocket.decode_frame(frame)
+  end
+
+  test "waits for partial frame" do
+    assert :more = Vcex.WebSocket.decode_frame(<<1::1, 0::3, 1::4, 1::1, 5::7, 1, 2, 3, 4, "hi">>)
   end
 end

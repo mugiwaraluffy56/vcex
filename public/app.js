@@ -225,7 +225,6 @@ callBtn.onclick = async () => {
 
     if (send(offer)) {
       setStatus("Calling");
-      log("offer sent");
     } else {
       callBtn.disabled = false;
     }

@@ -52,7 +52,7 @@ defmodule Vcex.Server do
     if String.downcase(Map.get(headers, "upgrade", "")) == "websocket" do
       :ok = :gen_tcp.send(socket, Vcex.WebSocket.handshake(headers))
       :ok = Vcex.Room.join(self())
-      ws_loop(socket)
+      ws_loop(socket, <<>>)
     else
       send_response(socket, 426, "text/plain", "websocket required")
     end
@@ -78,22 +78,16 @@ defmodule Vcex.Server do
     :gen_tcp.close(socket)
   end
 
-  defp ws_loop(socket) do
+  defp ws_loop(socket, buffer) do
     :inet.setopts(socket, active: :once)
 
     receive do
       {:tcp, ^socket, frame} ->
-        case Vcex.WebSocket.decode(frame) do
-          {:ok, 1, payload} -> Vcex.Room.relay(self(), payload)
-          {:ok, 8, _payload} -> Vcex.Room.leave(self())
-          _other -> :ok
-        end
-
-        ws_loop(socket)
+        ws_loop(socket, drain_frames(buffer <> frame))
 
       {:ws_send, payload} ->
         :gen_tcp.send(socket, Vcex.WebSocket.encode_text(payload))
-        ws_loop(socket)
+        ws_loop(socket, buffer)
 
       {:peer_count, count} ->
         :gen_tcp.send(
@@ -101,7 +95,7 @@ defmodule Vcex.Server do
           Vcex.WebSocket.encode_text(~s({"type":"peer-count","count":#{count}}))
         )
 
-        ws_loop(socket)
+        ws_loop(socket, buffer)
 
       {:tcp_closed, ^socket} ->
         Vcex.Room.leave(self())
@@ -112,6 +106,27 @@ defmodule Vcex.Server do
       120_000 ->
         :gen_tcp.close(socket)
         Vcex.Room.leave(self())
+    end
+  end
+
+  defp drain_frames(buffer) do
+    case Vcex.WebSocket.decode_frame(buffer) do
+      {:ok, 1, payload, rest} ->
+        Vcex.Room.relay(self(), payload)
+        drain_frames(rest)
+
+      {:ok, 8, _payload, rest} ->
+        Vcex.Room.leave(self())
+        rest
+
+      {:ok, _opcode, _payload, rest} ->
+        drain_frames(rest)
+
+      :more ->
+        buffer
+
+      {:error, _reason} ->
+        <<>>
     end
   end
 end

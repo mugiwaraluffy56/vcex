@@ -26,20 +26,32 @@ defmodule Vcex.WebSocket do
     <<0x81, 126, byte_size(text)::16>> <> text
   end
 
-  def decode(<<_fin::1, _rsv::3, opcode::4, 1::1, len::7, mask::binary-4, payload::binary>>)
+  def decode_frame(<<_fin::1, _rsv::3, opcode::4, 1::1, len::7, mask::binary-4, rest::binary>>)
       when len < 126 do
-    {:ok, opcode, unmask(payload, mask)}
+    if byte_size(rest) >= len do
+      <<payload::binary-size(len), tail::binary>> = rest
+      {:ok, opcode, unmask(payload, mask), tail}
+    else
+      :more
+    end
   end
 
-  def decode(
-        <<_fin::1, _rsv::3, opcode::4, 1::1, 126::7, len::16, mask::binary-4, payload::binary>>
-      )
-      when byte_size(payload) >= len do
-    <<body::binary-size(len), _rest::binary>> = payload
-    {:ok, opcode, unmask(body, mask)}
+  def decode_frame(
+        <<_fin::1, _rsv::3, opcode::4, 1::1, 126::7, len::16, mask::binary-4, rest::binary>>
+      ) do
+    if byte_size(rest) >= len do
+      <<payload::binary-size(len), tail::binary>> = rest
+      {:ok, opcode, unmask(payload, mask), tail}
+    else
+      :more
+    end
   end
 
-  def decode(_frame), do: :more
+  def decode_frame(<<_fin::1, _rsv::3, _opcode::4, 1::1, 127::7, _rest::binary>>) do
+    {:error, :frame_too_large}
+  end
+
+  def decode_frame(_frame), do: :more
 
   defp unmask(payload, mask) do
     mask_bytes = :binary.bin_to_list(mask)

@@ -6,6 +6,7 @@ const wsUrlEl = document.querySelector("#wsUrl");
 const peerCountEl = document.querySelector("#peerCount");
 const localVideo = document.querySelector("#localVideo");
 const remoteVideo = document.querySelector("#remoteVideo");
+const logEl = document.querySelector("#log");
 
 let ws;
 let pc;
@@ -21,9 +22,15 @@ const setStatus = (text) => {
   statusEl.textContent = text;
 };
 
+const log = (text) => {
+  const time = new Date().toLocaleTimeString();
+  logEl.textContent = `${time} ${text}\n${logEl.textContent}`.slice(0, 3000);
+};
+
 const fail = (error) => {
   console.error(error);
   setStatus(error.message || String(error));
+  log(`error: ${error.message || String(error)}`);
 };
 
 const refreshControls = () => {
@@ -42,17 +49,20 @@ const connectSocket = () => {
 
   ws.onopen = () => {
     setStatus("Signal connected");
+    log("signal connected");
     refreshControls();
     if (wsReadyResolve) wsReadyResolve();
   };
 
   ws.onclose = () => {
     setStatus("Signal closed");
+    log("signal closed");
     refreshControls();
   };
 
   ws.onerror = () => {
     setStatus("Signal error");
+    log("signal error");
     if (wsReadyReject) wsReadyReject(new Error("Signal error"));
   };
 
@@ -62,21 +72,25 @@ const connectSocket = () => {
 
       if (msg.type === "peer-count" || msg.type === "peer-joined" || msg.type === "peer-left") {
         peerCountEl.textContent = `peers: ${msg.count}`;
+        log(`${msg.type}: ${msg.count}`);
         return;
       }
 
       if (!pc) createPeer();
 
       if (msg.type === "offer") {
+        log("offer received");
         await pc.setRemoteDescription(msg);
         await flushCandidates();
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
         send(answer);
         setStatus("Answered");
+        log("answer sent");
       }
 
       if (msg.type === "answer") {
+        log("answer received");
         await pc.setRemoteDescription(msg);
         await flushCandidates();
         setStatus("Connected");
@@ -85,8 +99,10 @@ const connectSocket = () => {
       if (msg.type === "candidate" && msg.candidate) {
         if (pc.remoteDescription) {
           await pc.addIceCandidate(msg.candidate);
+          log("candidate added");
         } else {
           pendingCandidates.push(msg.candidate);
+          log("candidate queued");
         }
       }
     } catch (error) {
@@ -110,6 +126,7 @@ const waitForSignal = () => {
 const send = (payload) => {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify(payload));
+    log(`${payload.type} sent`);
     return true;
   }
 
@@ -143,11 +160,21 @@ const createPeer = () => {
 
   pc.ontrack = (event) => {
     remoteVideo.srcObject = event.streams[0];
+    log("remote track received");
   };
 
   pc.onconnectionstatechange = () => {
     setStatus(`Peer ${pc.connectionState}`);
+    log(`peer ${pc.connectionState}`);
     hangupBtn.disabled = pc.connectionState === "closed";
+  };
+
+  pc.oniceconnectionstatechange = () => {
+    log(`ice ${pc.iceConnectionState}`);
+  };
+
+  pc.onicegatheringstatechange = () => {
+    log(`ice gathering ${pc.iceGatheringState}`);
   };
 
   if (localStream) {
@@ -176,6 +203,7 @@ startBtn.onclick = async () => {
       audio: true
     });
     localVideo.srcObject = localStream;
+    log("camera ready");
     createPeer();
     await signalReady;
     refreshControls();
@@ -197,6 +225,7 @@ callBtn.onclick = async () => {
 
     if (send(offer)) {
       setStatus("Calling");
+      log("offer sent");
     } else {
       callBtn.disabled = false;
     }

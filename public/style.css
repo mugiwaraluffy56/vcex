@@ -46,6 +46,19 @@ span {
   color: #aeb8bf;
 }
 
+.log {
+  min-height: 80px;
+  max-height: 140px;
+  overflow: auto;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid #2c343b;
+  background: #080a0c;
+  color: #b8c2ca;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
 .controls {
   display: flex;
   gap: 8px;

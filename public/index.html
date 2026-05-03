@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LAN Call</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <h1>LAN Call</h1>
+          <p id="status">Idle</p>
+        </div>
+        <div class="controls">
+          <button id="startBtn">Start</button>
+          <button id="callBtn" disabled>Call</button>
+          <button id="hangupBtn" disabled>Hang up</button>
+        </div>
+      </header>
+
+      <section class="videos">
+        <article>
+          <video id="localVideo" autoplay muted playsinline></video>
+          <span>Local</span>
+        </article>
+        <article>
+          <video id="remoteVideo" autoplay playsinline></video>
+          <span>Remote</span>
+        </article>
+      </section>
+
+      <footer class="meta">
+        <code id="wsUrl"></code>
+        <code id="peerCount">peers: 0</code>
+      </footer>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

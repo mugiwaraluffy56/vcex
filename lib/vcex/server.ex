@@ -32,9 +32,17 @@ defmodule Vcex.Server do
   @impl true
   def handle_info(:accept, state) do
     {:ok, client} = :gen_tcp.accept(state.socket)
-    Task.start(fn -> handle_client(client) end)
+    pid = spawn_link(fn -> wait_for_socket() end)
+    :ok = :gen_tcp.controlling_process(client, pid)
+    send(pid, {:socket, client})
     send(self(), :accept)
     {:noreply, state}
+  end
+
+  defp wait_for_socket do
+    receive do
+      {:socket, socket} -> handle_client(socket)
+    end
   end
 
   defp handle_client(socket) do

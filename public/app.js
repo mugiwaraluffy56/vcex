@@ -11,6 +11,8 @@ let ws;
 let pc;
 let localStream;
 let pendingCandidates = [];
+let wsReadyResolve;
+let wsReadyReject;
 
 const wsUrl = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
 wsUrlEl.textContent = wsUrl;
@@ -24,16 +26,36 @@ const fail = (error) => {
   setStatus(error.message || String(error));
 };
 
+const refreshControls = () => {
+  const signalReady = ws && ws.readyState === WebSocket.OPEN;
+  const cameraReady = Boolean(localStream);
+  callBtn.disabled = !(signalReady && cameraReady);
+  hangupBtn.disabled = !cameraReady;
+};
+
 const connectSocket = () => {
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+    return;
+  }
+
   ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
     setStatus("Signal connected");
-    if (localStream) callBtn.disabled = false;
+    refreshControls();
+    if (wsReadyResolve) wsReadyResolve();
   };
 
-  ws.onclose = () => setStatus("Signal closed");
-  ws.onerror = () => setStatus("Signal error");
+  ws.onclose = () => {
+    setStatus("Signal closed");
+    refreshControls();
+  };
+
+  ws.onerror = () => {
+    setStatus("Signal error");
+    if (wsReadyReject) wsReadyReject(new Error("Signal error"));
+  };
+
   ws.onmessage = async (event) => {
     try {
       const msg = JSON.parse(event.data);
@@ -71,6 +93,18 @@ const connectSocket = () => {
       fail(error);
     }
   };
+};
+
+const waitForSignal = () => {
+  if (ws && ws.readyState === WebSocket.OPEN) return Promise.resolve();
+
+  connectSocket();
+
+  return new Promise((resolve, reject) => {
+    wsReadyResolve = resolve;
+    wsReadyReject = reject;
+    window.setTimeout(() => reject(new Error("Signal timeout")), 5000);
+  });
 };
 
 const send = (payload) => {
@@ -132,6 +166,7 @@ startBtn.onclick = async () => {
     startBtn.disabled = true;
     callBtn.disabled = true;
     connectSocket();
+    const signalReady = waitForSignal();
     localStream = await navigator.mediaDevices.getUserMedia({
       video: {
         width: { ideal: 1920 },
@@ -142,10 +177,12 @@ startBtn.onclick = async () => {
     });
     localVideo.srcObject = localStream;
     createPeer();
-    hangupBtn.disabled = false;
-    setStatus("Camera ready, waiting signal");
+    await signalReady;
+    refreshControls();
+    setStatus("Ready");
   } catch (error) {
     startBtn.disabled = false;
+    refreshControls();
     fail(error);
   }
 };
@@ -153,6 +190,7 @@ startBtn.onclick = async () => {
 callBtn.onclick = async () => {
   try {
     callBtn.disabled = true;
+    await waitForSignal();
     if (!pc) createPeer();
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);

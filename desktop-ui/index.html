@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>vcex</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1>vcex</h1>
+        <p>Native LAN video call launcher</p>
+      </section>
+
+      <section class="grid">
+        <article>
+          <h2>Host call</h2>
+          <p>Start Elixir signaling and local TURN relay on this machine.</p>
+          <button id="hostBtn">Start host</button>
+          <code id="hostUrl">host URL appears here</code>
+        </article>
+
+        <article>
+          <h2>Join call</h2>
+          <p>Connect to someone running vcex host.</p>
+          <input id="joinUrl" value="http://localhost:4000" />
+          <button id="joinBtn">Join</button>
+        </article>
+      </section>
+
+      <pre id="log"></pre>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

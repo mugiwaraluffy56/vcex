@@ -1,6 +1,6 @@
 # Native Desktop App
 
-vcex includes a Tauri desktop shell. It loads the running vcex web server in a native window.
+vcex includes a Tauri desktop launcher.
 
 ## Requirements
 
@@ -8,39 +8,38 @@ vcex includes a Tauri desktop shell. It loads the running vcex web server in a n
 npm install
 ```
 
-## Run Services
-
-Terminal 1:
-
-```bash
-elixir start_turn.exs
-```
-
-Terminal 2:
-
-```bash
-mix run --no-halt
-```
-
-## Run Desktop App
-
-Terminal 3:
+## Run
 
 ```bash
 npm run desktop:dev
 ```
 
-The default app URL is:
+## Host
+
+Click `Start host`.
+
+The native app starts:
+
+- local TURN relay on `3478`
+- Elixir signaling server on `4000`
+
+Then it opens:
 
 ```text
 http://localhost:4000
 ```
 
-Override it with:
+Share the LAN URL shown in the launcher, for example:
 
-```bash
-VCEX_URL=http://10.110.154.203:4000 npm run desktop:dev
+```text
+http://10.110.154.203:4000
 ```
+
+## Join
+
+Enter the host URL and click `Join`.
+
+If using SSH tunnel, join `http://localhost:4000`.
 
 ## Build
 

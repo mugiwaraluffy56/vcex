@@ -1,8 +1,8 @@
 :root {
   color-scheme: dark;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #101316;
-  color: #f5f7f8;
+  background: #111827;
+  color: #ffffff;
 }
 
 * {
@@ -11,6 +11,10 @@
 
 body {
   margin: 0;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(96, 165, 250, 0.32), transparent 30%),
+    linear-gradient(135deg, #7e22ce 0%, #4f46e5 48%, #1d4ed8 100%);
 }
 
 main {
@@ -19,6 +23,21 @@ main {
   align-content: center;
   gap: 22px;
   padding: 28px;
+}
+
+.hero,
+article,
+pre {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.hero {
+  padding: 22px;
 }
 
 .hero h1,
@@ -36,7 +55,7 @@ article p {
 article p,
 code,
 pre {
-  color: #aeb8bf;
+  color: rgba(255, 255, 255, 0.84);
 }
 
 .grid {
@@ -49,19 +68,23 @@ article {
   display: grid;
   gap: 12px;
   padding: 18px;
-  border: 1px solid #2c343b;
-  border-radius: 8px;
-  background: #151b20;
 }
 
 button,
 input {
   min-height: 42px;
-  border: 1px solid #39424a;
-  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
   padding: 10px 12px;
-  background: #1d242a;
-  color: #f5f7f8;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+input {
+  border-radius: 12px;
 }
 
 button {
@@ -74,8 +97,6 @@ pre {
   overflow: auto;
   margin: 0;
   padding: 12px;
-  border: 1px solid #2c343b;
-  background: #080a0c;
   white-space: pre-wrap;
 }
 

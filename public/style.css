@@ -1,8 +1,8 @@
 :root {
   color-scheme: dark;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #101316;
-  color: #f5f7f8;
+  background: #111827;
+  color: #ffffff;
 }
 
 * {
@@ -12,15 +12,30 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #101316;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(96, 165, 250, 0.32), transparent 30%),
+    linear-gradient(135deg, #7e22ce 0%, #4f46e5 48%, #1d4ed8 100%);
 }
 
 .app {
   min-height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr auto auto;
   gap: 18px;
   padding: 18px;
+}
+
+.topbar,
+.meta,
+.log,
+article,
+.dialog {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .topbar,
@@ -29,6 +44,8 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
 }
 
 h1,
@@ -43,7 +60,7 @@ h1 {
 p,
 code,
 span {
-  color: #aeb8bf;
+  color: rgba(255, 255, 255, 0.84);
 }
 
 .log {
@@ -52,9 +69,8 @@ span {
   overflow: auto;
   margin: 0;
   padding: 10px;
-  border: 1px solid #2c343b;
-  background: #080a0c;
-  color: #b8c2ca;
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.86);
   font-size: 12px;
   white-space: pre-wrap;
 }
@@ -65,15 +81,13 @@ span {
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(0, 0, 0, 0.48);
 }
 
 .dialog {
   width: min(360px, 100%);
   padding: 18px;
-  border: 1px solid #3c4650;
-  border-radius: 8px;
-  background: #11171c;
+  border-radius: 16px;
 }
 
 .dialog h2 {
@@ -85,28 +99,27 @@ span {
   margin-bottom: 16px;
 }
 
-.dialog-actions {
+.dialog-actions,
+.controls {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .modal[hidden] {
   display: none;
 }
 
-.controls {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 button {
-  border: 1px solid #39424a;
-  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
   padding: 10px 14px;
-  background: #1d242a;
-  color: #f5f7f8;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   cursor: pointer;
 }
 
@@ -125,8 +138,8 @@ button:disabled {
 article {
   position: relative;
   min-height: 280px;
-  border: 1px solid #2c343b;
-  background: #060708;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 video {
@@ -145,8 +158,11 @@ span {
   left: 12px;
   bottom: 12px;
   padding: 4px 8px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 @media (max-width: 760px) {

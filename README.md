@@ -45,3 +45,7 @@ If direct media fails with `ice failed`, run local TURN relay. See `docs/turn.md
 - `elixir smoke_test.exs`: quick HTTP health test.
 
 See `USING.md` for full local, LAN, SSH, and troubleshooting steps.
+
+## Native Desktop App
+
+vcex includes a Tauri shell for a native desktop window. See `docs/desktop.md`.

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "vcex",
+  "version": "0.1.0",
+  "identifier": "com.vcex.app",
+  "build": {
+    "frontendDist": "../public"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [],
+    "macOS": {
+      "entitlements": "entitlements.plist",
+      "infoPlist": "Info.plist"
+    }
+  }
+}

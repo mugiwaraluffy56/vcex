@@ -1,5 +1,8 @@
 /_build/
 /deps/
+/node_modules/
+/src-tauri/gen/
+/src-tauri/target/
 /.elixir_ls/
 /*.ez
 erl_crash.dump

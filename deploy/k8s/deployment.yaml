@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vcex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vcex
+  template:
+    metadata:
+      labels:
+        app: vcex
+    spec:
+      containers:
+        - name: vcex
+          image: vcex:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4000
+          env:
+            - name: PORT
+              value: "4000"
+            - name: HOST
+              value: "0.0.0.0"
+

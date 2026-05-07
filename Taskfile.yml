@@ -1,0 +1,21 @@
+version: "3"
+
+tasks:
+  run:
+    cmds:
+      - mix run --no-halt
+  test:
+    cmds:
+      - mix test
+  format:
+    cmds:
+      - mix format --check-formatted
+  smoke:
+    cmds:
+      - elixir smoke_test.exs
+  verify:
+    deps: [format, test, smoke]
+  desktop:info:
+    cmds:
+      - npm run desktop:info
+

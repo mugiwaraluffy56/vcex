@@ -1,0 +1,8 @@
+* text=auto eol=lf
+
+*.ex linguist-language=Elixir
+*.exs linguist-language=Elixir
+*.rs linguist-language=Rust
+*.js linguist-language=JavaScript
+*.css linguist-language=CSS
+

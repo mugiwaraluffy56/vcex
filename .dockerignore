@@ -1,0 +1,13 @@
+_build
+deps
+node_modules
+src-tauri/target
+src-tauri/gen
+.elixir_ls
+.git
+.env
+.env.*
+!.env.example
+*.ez
+erl_crash.dump
+
